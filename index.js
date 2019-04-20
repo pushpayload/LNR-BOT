@@ -179,16 +179,16 @@ async function setMemberName(msg, userId, gw2username) {
                     if (member.id === userId) {
                         var nickname = (member.user.nick ? member.user.nick : member.user.username)
 
-                        var partInParentheses = gw2username;
+                        var partInParentheses = gw2username
 
                         // If the player's Discord name is the same as the account name, we omit it in the parentheses.
-                        var split = gw2username.split(".")
+                        var split = gw2username.split('.')
                         if (split.length == 2) {
                             var gw2accountName = split[0]
                             var gw2accountNumber = split[1]
 
                             if (nickname == gw2accountName) {
-                                partInParentheses = "." + gw2accountNumber;
+                                partInParentheses = '.' + gw2accountNumber
                             }
                         }
 
