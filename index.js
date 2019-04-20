@@ -1,5 +1,5 @@
 require('dotenv').config()
-const Eris = require("eris")
+const Eris = require('eris')
 const liTiers = {
     'Little Bee': 'roleID0',
     'Tier I': 'roleID1',
@@ -47,8 +47,6 @@ bot.on('messageCreate', (msg) => { // When a message is created
         if (msg.content.includes('here are your Legendary Insights')) {
             // console.log(msg)
             var user = msg.mentions[0]
-            var content = msg.content
-            var attachments = msg.attachments
             var li = 0
             var tier = 'Little Bee'
             if (msg.embeds[0].title.includes('Legendary Insights and Divinations earned')) {
@@ -66,17 +64,24 @@ bot.on('messageCreate', (msg) => { // When a message is created
                     tier = 'Tier I'
                 }
                 setMemberRole(msg, user.id, liTiers[tier]).then((res) => {
-                    setMemberName(msg, user.id, gw2username).then((res) => {
+                    if (res == 'first') {
+                        setMemberName(msg, user.id, gw2username).then(() => {
+                            bot.createMessage(
+                                msg.channel.id,
+                                `Detected LI response to user: <@${user.id}>, GW2 username: ${gw2username}, LIs: ${li} giving access to: ${tier}`
+                            )
+                        }).catch((err) => {
+                            console.error(`error: ${err}`)
+                            if (debug) {
+                                bot.createMessage(msg.channel.id, `error: ${err}`)
+                            }
+                        })
+                    } else {
                         bot.createMessage(
                             msg.channel.id,
-                            `Detected LI response to user: <@${user.id}>, GW2 username: ${gw2username}, LIs: ${li} giving access to: ${tier}`
+                            `Detected LI response to user: <@${user.id}>, GW2 username: ${gw2username}, LIs: ${li} upgraded to: ${tier}`
                         )
-                    }).catch((err) => {
-                        console.error(`error: ${err}`)
-                        if (debug) {
-                            bot.createMessage(msg.channel.id, `error: ${err}`)
-                        }
-                    })
+                    }
                 }).catch((err) => {
                     console.error(`error: ${err}`)
                     if (debug) {
@@ -127,7 +132,7 @@ async function setMemberRole(msg, userId, roleId) {
                                 }).then(() => {
                                     member.addRole(memberRoleId, 'default member role').then(() => {
                                         member.addRole(roleId, 'granted for having enough LIs').then(() => {
-                                            resolve()
+                                            resolve('upgraded')
                                         }).catch((err) => {
                                             console.error(`error: ${err}`)
                                             reject(`addRole error: ${err}`)
@@ -141,7 +146,7 @@ async function setMemberRole(msg, userId, roleId) {
                         } else {
                             member.addRole(memberRoleId, 'default member role').then(() => {
                                 member.addRole(roleId, 'granted for having enough LIs').then(() => {
-                                    resolve()
+                                    resolve('first')
                                 }).catch((err) => {
                                     console.error(`error: ${err}`)
                                     reject(`addRole error: ${err}`)
@@ -162,7 +167,7 @@ async function setMemberRole(msg, userId, roleId) {
 }
 
 function getKeyByValue(object, value) {
-    return Object.keys(object).find(key => object[key] === value);
+    return Object.keys(object).find(key => object[key] === value)
 }
 
 async function setMemberName(msg, userId, gw2username) {
